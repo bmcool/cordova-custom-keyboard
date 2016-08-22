@@ -42,14 +42,8 @@ Available keyboards:
 Quick Example
 -------------
 ~~~
-document.getElementById('decimal').onclick = function() {
-  CustomKeyboard.open(document.getElementById('decimal').value, 9, function (value) {
-    //fired every time when value changed
-      document.getElementById('decimal').value = value;
-    }, function (value) {
-      alert('Editing ended with ' + value);
-      fired once when user finished editing.
-    })
+document.getElementById('decimal').ontouchstart = function() {
+  CustomKeyboard.open('decimal', 9);
 }
 ~~~
 
