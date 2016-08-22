@@ -84,6 +84,13 @@ UITextView *hiddenTextView;
 
 - (void)open:(CDVInvokedUrlCommand*)command
 {
+    UIView * v = [self.webView findFirstResponder];
+    
+    if (v) {
+        NSLog(@"WEB Keyboard is too fast..so resignFirstResponder");
+        [v resignFirstResponder];
+    }
+    
     isBlockHtmlKeyboard = YES;
     
     elementId = [command argumentAtIndex:0];
