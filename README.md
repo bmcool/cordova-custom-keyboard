@@ -11,7 +11,7 @@ Under hood this plugin just create invisible native input and open keyboard for 
 Installation
 -------
 ~~~
-cordova plugin add https://github.com/mnill/cordova-custom-keyboard
+cordova plugin add https://github.com/bmcool/cordova-custom-keyboard
 ~~~
 
 Methods
