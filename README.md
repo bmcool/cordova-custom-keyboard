@@ -17,8 +17,7 @@ cordova plugin add https://github.com/bmcool/cordova-custom-keyboard
 Methods
 -------
 
-- CustomKeyboard.open(startedValue, keyboardType, changedCb, finishedCb);
-- CustomKeyboard.change(newValue);
+- CustomKeyboard.bind(startedValue, keyboardType, changedCb, finishedCb);
 
 Description.
 -------
@@ -41,9 +40,15 @@ Available keyboards:
 
 Quick Example
 -------------
+html
 ~~~
-document.getElementById('decimal').ontouchstart = function() {
-  CustomKeyboard.open('decimal', 9);
+<ion-input id="decimal" [(ngModel)]="phone"></ion-input>
+~~~
+
+ts
+~~~
+ngOnInit() {
+  CustomKeyboard.bind('decimal', this, 'phone', 9);
 }
 ~~~
 

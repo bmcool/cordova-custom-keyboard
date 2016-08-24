@@ -1,31 +1,7 @@
+
 #import "CDVCustomKeyboard.h"
 
-@implementation UIView (FindFirstResponder)
-- (UIView *)findFirstResponder
-{
-    if (self.isFirstResponder) {
-        return self;
-    }
-    
-    for (UIView *subView in self.subviews) {
-        UIView *firstResponder = [subView findFirstResponder];
-        
-        if (firstResponder != nil) {
-            return firstResponder;
-        }
-    }
-    
-    return nil;
-}
-@end
-
-
-@interface CDVCustomKeyboard ()<UITextViewDelegate> {
-    BOOL isBlockHtmlKeyboard;
-    NSString *elementId;
-}
-
-@property (nonatomic, readwrite, assign) BOOL keyboardIsVisible;
+@interface CDVCustomKeyboard ()<UITextViewDelegate>
 
 @end
 
@@ -36,7 +12,6 @@ UITextView *hiddenTextView;
 - (void)pluginInitialize
 {
     if (hiddenTextView == NULL) {
-        isBlockHtmlKeyboard = NO;
         hiddenTextView = [[UITextView alloc] init];
         hiddenTextView.alpha = 0;
         hiddenTextView.autocorrectionType = UITextAutocorrectionTypeNo;
@@ -44,26 +19,6 @@ UITextView *hiddenTextView;
         hiddenTextView.keyboardType = UIKeyboardTypeDecimalPad;
         hiddenTextView.delegate = self;
         [self.viewController.view addSubview:hiddenTextView];
-        [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
-    }
-}
-
-- (void)keyboardWillShow:(NSNotification *)notification
-{
-    if (!isBlockHtmlKeyboard) {
-        return;
-    }
-    
-    UIView * v = [self.webView findFirstResponder];
-    
-    if (v) {
-        [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"document.getElementById('%@').keyboard = document.activeElement;", elementId]];
-        
-        hiddenTextView.text = [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"document.getElementById('%@').keyboard.value;", elementId]];
-        [hiddenTextView becomeFirstResponder];
-        UIButton *btn = [[UIButton alloc] initWithFrame:self.viewController.view.frame];
-        [btn addTarget:self action:@selector(resignKeyBoard:) forControlEvents:UIControlEventTouchUpInside];
-        [self.viewController.view addSubview:btn];
     }
 }
 
@@ -71,29 +26,25 @@ UITextView *hiddenTextView;
 {
     [hiddenTextView resignFirstResponder];
     [sender removeFromSuperview];
-    isBlockHtmlKeyboard = NO;
 }
 
 - (void)textViewDidChange:(UITextView *)textView {
-    [(UIWebView *)self.webView stringByEvaluatingJavaScriptFromString:[NSString stringWithFormat:@"document.getElementById('%@').keyboard.value = '%@';", elementId, hiddenTextView.text]];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:hiddenTextView.text];
+    [pluginResult setKeepCallbackAsBool:YES];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
 }
 
-- (void) textViewDidEndEditing:(UITextView *)textView {
-    NSLog(@"textViewDidEndEditing");
-}
-
-- (void)open:(CDVInvokedUrlCommand*)command
+-(void)textViewDidEndEditing:(UITextView *)textView
 {
-    UIView * v = [self.webView findFirstResponder];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:hiddenTextView.text];
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:self.callbackId];
+}
+
+- (void)bind:(CDVInvokedUrlCommand*)command
+{
+    self.callbackId = command.callbackId;
     
-    if (v) {
-        NSLog(@"WEB Keyboard is too fast..so resignFirstResponder");
-        [v resignFirstResponder];
-    }
-    
-    isBlockHtmlKeyboard = YES;
-    
-    elementId = [command argumentAtIndex:0];
+    NSString *startedValue = [command argumentAtIndex:0];
     NSInteger keyBoardTypeInt = [[command argumentAtIndex:1] integerValue];
     
     switch (keyBoardTypeInt) {
@@ -135,6 +86,12 @@ UITextView *hiddenTextView;
             break;
     }
     hiddenTextView.keyboardType = self.keyboardType;
+    hiddenTextView.text = startedValue;
+    [hiddenTextView becomeFirstResponder];
+    
+    //    UIButton *btn = [[UIButton alloc] initWithFrame:self.viewController.view.frame];
+    //    [btn addTarget:self action:@selector(resignKeyBoard:) forControlEvents:UIControlEventTouchUpInside];
+    //    [self.viewController.view addSubview:btn];
 }
 
 @end

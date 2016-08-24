@@ -1,3 +1,4 @@
+
 var argscheck = require('cordova/argscheck'),
     utils = require('cordova/utils'),
     exec = require('cordova/exec');
@@ -18,21 +19,23 @@ var CustomKeyboard = function() {
 // 10 =  UIKeyboardTypeTwitter;
 // 11 =  UIKeyboardTypeWebSearch;
 
-CustomKeyboard.open = function(value, keyboard, onChange, onFinished) {
+CustomKeyboard.bind = function(id, scope, model, keyboard) {
+    var target = document.getElementById(id);
+    var input = target.getElementsByTagName('input')[0];
+    input.disabled = true;
+    target.disabled = true;
+    input.style.opacity = 1;
     !keyboard && (keyboard = 1);
-    !value && (value = '');
-    value = '' + value;
-    exec(onChange, onFinished, "CustomKeyboard", "open", [value, keyboard]);
-};
-
-CustomKeyboard.change = function(value) {
-    !value && (value = '');
-    value = '' + value;
-    exec(null, null, "CustomKeyboard", "change", [value]);
-};
-
-CustomKeyboard.close = function(callback) {
-    exec(callback, null, "CustomKeyboard", "close", []);
+    var onChange = function(v) {
+        scope[model] = v;
+        input.value = v;
+    }
+    var onFinish = function(v) {
+        target.blur();
+    }
+    target.ontouchstart = function() {
+        exec(onChange, onFinish, "CustomKeyboard", "bind", [input.value, keyboard]);
+    }
 };
 
 module.exports = CustomKeyboard;
