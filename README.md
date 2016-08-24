@@ -52,6 +52,13 @@ ngOnInit() {
 }
 ~~~
 
+scss
+~~~
+.text-input[disabled] {
+  opacity: 1;
+}
+~~~
+
 Supported Platforms
 -------------------
 
