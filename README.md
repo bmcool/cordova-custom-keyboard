@@ -47,7 +47,7 @@ html
 
 ts
 ~~~
-ngOnInit() {
+ngAfterViewInit() {
   CustomKeyboard.bind('decimal', this, 'phone', 9);
 }
 ~~~
